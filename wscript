@@ -29,11 +29,15 @@ omitaps = '--omitaps "_above,_below,_center,_ring,_through,_aboveLeft,_H,_L,_O,_
 opts = preprocess_args({'opt': '--autohint'}, {'opt': '--norename'}, {'opt': '--quick'}, {'opt': '--regOnly'})
 
 cmds = [cmd('ttx -m ${DEP} -o ${TGT} ${SRC}', ['source/jstf.ttx']) ]
-if '--norename' not in opts:
+# For scratch font, never rename glyphs:
+if False:  # '--norename' not in opts:
     cmds.append(cmd('psfchangettfglyphnames ${SRC} ${DEP} ${TGT}', ['${source}']))
 if '--autohint' in opts:
     # Note: in some fonts ttfautohint-generated hints don't maintain stroke thickness at joins; test thoroughly
     cmds.append(cmd('${TTFAUTOHINT} -n -c  -D arab -W ${DEP} ${TGT}'))
+
+# For scratch font, rename to "Scheherazade Scr"
+cmds.append(name('Scheherazade Scr'))
 
 # To shrink font files for release - no longer needed?
 #cmds.append(cmd('ttfsubset -s arab,latn ${DEP} ${TGT}'))
@@ -44,7 +48,8 @@ noGRkern = '_nokern' if '--quick' in opts else ''
 # iterate over designspace
 designspace('source/ScheherazadeNew.designspace',
     instanceparams='-l ' + genout + '${DS:FILENAME_BASE}_createintance.log',
-    instances = ['Scheherazade New Regular'] if '--regOnly' in opts else None,
+    # For scratch font, build regular only:
+    instances = ['Scheherazade New Regular'],  # if '--regOnly' in opts else None,
     target = process('${DS:FILENAME_BASE}.ttf', *cmds),
     ap = genout + '${DS:FILENAME_BASE}.xml',
     version=VERSION,  # Needed to ensure dev information on version string
